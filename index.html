@@ -5,215 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Para mi persona favorita 🌻</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;700&display=swap');
-
-        body {
-            margin: 0;
-            padding: 0;
-            background: #000;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        /* Pantalla del Temporizador */
-        #timer-screen {
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+        body { margin: 0; background: black; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { filter: drop-shadow(0 0 8px #FFA216); }
+        .text-center {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 1s ease-out;
-        }
-
-        .timer-title {
             font-family: 'Dancing Script', cursive;
-            font-size: 2.5rem;
-            color: #ffeb3b;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        #countdown {
-            font-size: 5rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px #fbc02d;
-        }
-
-        /* Pantalla Principal (Jardín) - Oculta al inicio */
-        #main-content {
-            display: none;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .header {
-            position: absolute;
-            top: 10%;
-            width: 100%;
-            text-align: center;
-            z-index: 100;
-            font-family: 'Dancing Script', cursive;
-            font-size: 2.8rem;
-            color: #fffde7;
-            text-shadow: 0 0 20px #fbc02d;
-        }
-
-        .phrase-container {
-            position: absolute;
-            top: 45%;
-            width: 100%;
-            text-align: center;
+            color: #FFA216;
+            font-size: 3rem;
+            opacity: 0;
+            transition: opacity 2s ease-in;
+            text-shadow: 0 0 15px rgba(255, 162, 22, 1);
             z-index: 10;
-        }
-
-        .phrase {
-            display: none;
-            font-size: 1.5rem;
-            font-weight: 700;
-            padding: 0 20px;
-            text-shadow: 0 0 10px #000;
-            animation: fadeUp 4s ease-in-out;
-        }
-
-        @keyframes fadeUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            20% { opacity: 1; transform: translateY(0); }
-            80% { opacity: 1; }
-            100% { opacity: 0; transform: translateY(-20px); }
-        }
-
-        .garden {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            perspective: 600px;
-        }
-
-        .flower-3d {
-            position: absolute;
-            font-size: 3.5rem;
-            bottom: -100px;
-            animation: moveForward var(--t) linear infinite;
-        }
-
-        @keyframes moveForward {
-            0% { transform: translate3d(var(--x), 0, -1000px) scale(0.1); opacity: 0; }
-            20% { opacity: 1; }
-            100% { transform: translate3d(var(--x2), 200px, 500px) scale(2.5); opacity: 0; }
-        }
-
-        .dust {
-            position: absolute;
-            background: gold;
-            border-radius: 50%;
-            animation: floatDust var(--t) linear infinite;
-        }
-
-        @keyframes floatDust {
-            0% { transform: translateY(100vh); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-10vh); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div id="timer-screen">
-        <div class="timer-title">Algo especial para ti...</div>
-        <div id="countdown">3</div>
-    </div>
+    <div class="text-center" id="texto">I love U</div>
+    <canvas id="girasol"></canvas>
 
-    <div id="main-content">
-        <div class="header">Flores amarillas<br>para el amor de mi vida 💛</div>
-        <div class="phrase-container" id="phrase-box">
-            </div>
-        <div class="garden" id="garden-box"></div>
-    </div>
+    <div id="player"></div>
 
     <script>
-        const phrasesArr = [
-            "Eres el mejor regalo de mi vida",
-            "Flores únicas como tú",
-            "La estrella más brillante de mi universo",
-            "Te amo hoy y siempre",
-            "Tú iluminas mis días",
-            "Corazón que vale más que el oro",
-            "Mi sueño más bonito eres tú",
-            "Te admiro bastante"
-        ];
+        // Carga de la API de YouTube para controlar el tiempo exacto
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // Lógica del Temporizador
-        let timeLeft = 3;
-        const countdownEl = document.getElementById('countdown');
-        const timerScreen = document.getElementById('timer-screen');
-        const mainContent = document.getElementById('main-content');
-
-        const timerInterval = setInterval(() => {
-            timeLeft--;
-            if (timeLeft > 0) {
-                countdownEl.textContent = timeLeft;
-            } else if (timeLeft === 0) {
-                countdownEl.textContent = "¡YA!";
-            } else {
-                clearInterval(timerInterval);
-                startSurprise();
-            }
-        }, 1000);
-
-        function startSurprise() {
-            timerScreen.style.opacity = '0';
-            setTimeout(() => {
-                timerScreen.style.display = 'none';
-                mainContent.style.display = 'block';
-                initGarden();
-            }, 1000);
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0',
+                width: '0',
+                videoId: 'b4iVv91Z6lY',
+                playerVars: {
+                    'start': 179, // Comienza en 2:59
+                    'autoplay': 1,
+                    'controls': 0
+                },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
         }
 
-        function initGarden() {
-            // Iniciar Frases
-            const phraseBox = document.getElementById('phrase-box');
-            let current = 0;
-            
-            function showNext() {
-                phraseBox.innerHTML = `<div class="phrase" style="display:block">${phrasesArr[current]}</div>`;
-                current = (current + 1) % phrasesArr.length;
-                setTimeout(showNext, 4000);
+        function onPlayerReady(event) {
+            event.target.playVideo();
+            // Iniciar dibujo cuando la música empiece
+            setTimeout(drawSequence, 500);
+        }
+
+        const canvas = document.getElementById('girasol');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 600;
+        canvas.height = 600;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        function drawSequence() {
+            drawPetals();
+            setTimeout(drawCenter, 1000);
+        }
+
+        function drawPetals() {
+            ctx.strokeStyle = "#FFA216";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 16; i++) {
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate((i * Math.PI * 2) / 16);
+                for (let j = 0; j < 18; j++) {
+                    ctx.beginPath();
+                    ctx.arc(100 - j * 4, 50, 30, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                ctx.restore();
             }
-            showNext();
+        }
 
-            // Iniciar Girasoles
-            setInterval(() => {
-                const f = document.createElement('div');
-                f.className = 'flower-3d';
-                f.innerHTML = '🌻';
-                f.style.setProperty('--x', (Math.random() * 2000 - 1000) + 'px');
-                f.style.setProperty('--x2', (Math.random() * 4000 - 2000) + 'px');
-                f.style.setProperty('--t', (Math.random() * 2 + 3) + 's');
-                f.style.left = '50%';
-                document.getElementById('garden-box').appendChild(f);
-                setTimeout(() => f.remove(), 5000);
-            }, 300);
+        const golden_angle = 137.508 * (Math.PI / 180);
+        let n = 0;
 
-            // Iniciar Polvo de Oro
-            setInterval(() => {
-                const d = document.createElement('div');
-                d.className = 'dust';
-                d.style.width = d.style.height = Math.random() * 3 + 'px';
-                d.style.left = Math.random() * 100 + 'vw';
-                d.style.setProperty('--t', (Math.random() * 4 + 4) + 's');
-                document.body.appendChild(d);
-                setTimeout(() => d.remove(), 8000);
-            }, 100);
+        function drawCenter() {
+            if (n < 140) {
+                const r = 4 * Math.sqrt(n);
+                const theta = n * golden_angle;
+                const x = r * Math.cos(theta) + centerX;
+                const y = r * Math.sin(theta) + centerY;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = "#FFA216";
+                ctx.fill();
+
+                n++;
+                requestAnimationFrame(drawCenter);
+            } else {
+                document.getElementById('texto').style.opacity = "1";
+            }
         }
     </script>
 </body>

@@ -6,16 +6,17 @@
     <title>Para mi persona favorita 🌻</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
-        body { margin: 0; background: black; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        canvas { filter: drop-shadow(0 0 8px #FFA216); }
+        body { margin: 0; background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { filter: drop-shadow(0 0 10px #FFA216); }
         .text-center {
             position: absolute;
             font-family: 'Dancing Script', cursive;
             color: #FFA216;
-            font-size: 3rem;
+            font-size: 3.5rem;
             opacity: 0;
-            transition: opacity 2s ease-in;
-            text-shadow: 0 0 15px rgba(255, 162, 22, 1);
+            transform: scale(0.5);
+            transition: all 2s ease-in-out;
+            text-shadow: 0 0 20px #FFA216;
             z-index: 10;
         }
     </style>
@@ -28,7 +29,7 @@
     <div id="player"></div>
 
     <script>
-        // Carga de la API de YouTube para controlar el tiempo exacto
+        // Configuración de la música
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -37,73 +38,84 @@
         var player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                height: '0',
-                width: '0',
-                videoId: 'b4iVv91Z6lY',
-                playerVars: {
-                    'start': 179, // Comienza en 2:59
-                    'autoplay': 1,
-                    'controls': 0
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
+                height: '0', width: '0', videoId: 'b4iVv91Z6lY',
+                playerVars: { 'start': 179, 'autoplay': 1, 'controls': 0 },
+                events: { 'onReady': onPlayerReady }
             });
         }
 
         function onPlayerReady(event) {
             event.target.playVideo();
-            // Iniciar dibujo cuando la música empiece
-            setTimeout(drawSequence, 500);
+            // Empezamos a dibujar cuando la música cargue
+            setTimeout(animateFlower, 1000);
         }
 
         const canvas = document.getElementById('girasol');
         const ctx = canvas.getContext('2d');
-        canvas.width = 600;
-        canvas.height = 600;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
 
-        function drawSequence() {
-            drawPetals();
-            setTimeout(drawCenter, 1000);
-        }
+        let petalCount = 0;
+        let circleInPetal = 0;
 
-        function drawPetals() {
-            ctx.strokeStyle = "#FFA216";
-            ctx.lineWidth = 1;
-            for (let i = 0; i < 16; i++) {
-                ctx.save();
-                ctx.translate(centerX, centerY);
-                ctx.rotate((i * Math.PI * 2) / 16);
-                for (let j = 0; j < 18; j++) {
-                    ctx.beginPath();
-                    ctx.arc(100 - j * 4, 50, 30, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-                ctx.restore();
+        // Función para animar los pétalos uno por uno (como el "for" de Turtle)
+        function animateFlower() {
+            if (petalCount < 16) {
+                drawStepByStep();
+            } else {
+                drawCenterSpiral();
             }
         }
 
-        const golden_angle = 137.508 * (Math.PI / 180);
-        let n = 0;
+        function drawStepByStep() {
+            if (circleInPetal < 18) {
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate((petalCount * Math.PI * 2) / 16);
+                
+                ctx.beginPath();
+                ctx.strokeStyle = "#FFA216";
+                ctx.lineWidth = 1.5;
+                // La lógica exacta del video: circle(150 - j*6, 90)
+                ctx.arc(120 - circleInPetal * 5, 60, 35, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
 
-        function drawCenter() {
+                circleInPetal++;
+                setTimeout(drawStepByStep, 40); // Velocidad del trazo
+            } else {
+                circleInPetal = 0;
+                petalCount++;
+                setTimeout(animateFlower, 100);
+            }
+        }
+
+        // Espiral del centro (Líneas 21-30 del video)
+        let n = 0;
+        const golden_angle = 137.508 * (Math.PI / 180);
+
+        function drawCenterSpiral() {
             if (n < 140) {
-                const r = 4 * Math.sqrt(n);
+                const r = 4.5 * Math.sqrt(n);
                 const theta = n * golden_angle;
                 const x = r * Math.cos(theta) + centerX;
                 const y = r * Math.sin(theta) + centerY;
 
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.arc(x, y, 3.5, 0, Math.PI * 2);
                 ctx.fillStyle = "#FFA216";
                 ctx.fill();
 
                 n++;
-                requestAnimationFrame(drawCenter);
+                requestAnimationFrame(drawCenterSpiral);
             } else {
-                document.getElementById('texto').style.opacity = "1";
+                // Aparece el mensaje final
+                const txt = document.getElementById('texto');
+                txt.style.opacity = "1";
+                txt.style.transform = "scale(1)";
             }
         }
     </script>

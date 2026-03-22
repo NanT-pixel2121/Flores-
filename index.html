@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galaxia de Flores 🌻</title>
+    <title>Para mi persona favorita 🌻</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@300;700&display=swap');
 
         body {
             margin: 0;
@@ -16,135 +16,205 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            perspective: 800px;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Pantalla del Temporizador */
+        #timer-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease-out;
+        }
+
+        .timer-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: #ffeb3b;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #countdown {
+            font-size: 5rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px #fbc02d;
+        }
+
+        /* Pantalla Principal (Jardín) - Oculta al inicio */
+        #main-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
 
         .header {
             position: absolute;
             top: 10%;
+            width: 100%;
             text-align: center;
             z-index: 100;
             font-family: 'Dancing Script', cursive;
-            font-size: 2.5rem;
-            color: #fff;
-            text-shadow: 0 0 10px #ffeb3b, 0 0 20px #fbc02d;
+            font-size: 2.8rem;
+            color: #fffde7;
+            text-shadow: 0 0 20px #fbc02d;
+        }
+
+        .phrase-container {
+            position: absolute;
+            top: 45%;
             width: 100%;
+            text-align: center;
+            z-index: 10;
         }
 
-        /* Estrellas estáticas de fondo */
-        .star {
+        .phrase {
+            display: none;
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 0 20px;
+            text-shadow: 0 0 10px #000;
+            animation: fadeUp 4s ease-in-out;
+        }
+
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .garden {
             position: absolute;
-            background: #fff;
+            width: 100%;
+            height: 100%;
+            perspective: 600px;
+        }
+
+        .flower-3d {
+            position: absolute;
+            font-size: 3.5rem;
+            bottom: -100px;
+            animation: moveForward var(--t) linear infinite;
+        }
+
+        @keyframes moveForward {
+            0% { transform: translate3d(var(--x), 0, -1000px) scale(0.1); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translate3d(var(--x2), 200px, 500px) scale(2.5); opacity: 0; }
+        }
+
+        .dust {
+            position: absolute;
+            background: gold;
             border-radius: 50%;
-            opacity: 0.3;
+            animation: floatDust var(--t) linear infinite;
         }
 
-        /* Elementos del Vórtice */
-        .vortex-element {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            animation: travel 4s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes travel {
-            0% {
-                transform: translate3d(0, 0, -800px) rotate(0deg);
-                opacity: 0;
-            }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% {
-                /* El movimiento hacia los lados crea el efecto de expansión */
-                transform: translate3d(var(--x), var(--y), 400px) rotate(180deg);
-                opacity: 0;
-            }
-        }
-
-        .flower {
-            font-size: 2.5rem;
-            filter: drop-shadow(0 0 8px gold);
-        }
-
-        .text {
-            color: #fff;
-            font-family: 'Arial', sans-serif;
-            font-weight: bold;
-            font-size: 0.9rem;
-            text-shadow: 0 0 5px gold;
-            white-space: nowrap;
-            margin-top: 5px;
+        @keyframes floatDust {
+            0% { transform: translateY(100vh); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-10vh); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">Feliz día de las<br>Flores Amarillas 🌻</div>
-    <div id="scene"></div>
+    <div id="timer-screen">
+        <div class="timer-title">Algo especial para ti...</div>
+        <div id="countdown">3</div>
+    </div>
+
+    <div id="main-content">
+        <div class="header">Flores amarillas<br>para el amor de mi vida 💛</div>
+        <div class="phrase-container" id="phrase-box">
+            </div>
+        <div class="garden" id="garden-box"></div>
+    </div>
 
     <script>
-        const scene = document.getElementById('scene');
-        
-        // Frases optimizadas para que no saturen
-        const phrases = [
-            "Mi mejor regalo",
-            "Flores para ti",
-            "Mi estrella",
-            "Lo eres todo",
-            "Te amo siempre",
-            "Te adoro",
-            "Eres luz",
-            "Corazón de oro",
-            "Mi sueño bonito",
-            "Amor de mi vida",
-            "Eres única",
-            "🌻", "✨", "💛"
+        const phrasesArr = [
+            "Eres el mejor regalo de mi vida",
+            "Flores únicas como tú",
+            "La estrella más brillante de mi universo",
+            "Te amo hoy y siempre",
+            "Tú iluminas mis días",
+            "Corazón que vale más que el oro",
+            "Mi sueño más bonito eres tú",
+            "Te admiro bastante"
         ];
 
-        // Crear 100 estrellas de fondo
-        for (let i = 0; i < 100; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.width = star.style.height = Math.random() * 2 + 'px';
-            star.style.left = Math.random() * 100 + 'vw';
-            star.style.top = Math.random() * 100 + 'vh';
-            document.body.appendChild(star);
-        }
+        // Lógica del Temporizador
+        let timeLeft = 3;
+        const countdownEl = document.getElementById('countdown');
+        const timerScreen = document.getElementById('timer-screen');
+        const mainContent = document.getElementById('main-content');
 
-        function createVortex() {
-            const el = document.createElement('div');
-            el.className = 'vortex-element';
-            
-            const isFlower = Math.random() > 0.4;
-            if (isFlower) {
-                el.innerHTML = `<span class="flower">🌻</span>`;
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft > 0) {
+                countdownEl.textContent = timeLeft;
+            } else if (timeLeft === 0) {
+                countdownEl.textContent = "¡YA!";
             } else {
-                const txt = phrases[Math.floor(Math.random() * phrases.length)];
-                el.innerHTML = `<span class="flower">🌻</span><span class="text">${txt}</span>`;
+                clearInterval(timerInterval);
+                startSurprise();
             }
+        }, 1000);
 
-            // Ángulo aleatorio para que salgan disparadas en todas direcciones
-            const angle = Math.random() * Math.PI * 2;
-            const distance = 500 + Math.random() * 500;
-            const x = Math.cos(angle) * distance + 'px';
-            const y = Math.sin(angle) * distance + 'px';
-
-            el.style.setProperty('--x', x);
-            el.style.setProperty('--y', y);
-            el.style.animationDelay = Math.random() * 2 + 's';
-
-            scene.appendChild(el);
-
-            // Eliminar para que no explote el navegador
-            setTimeout(() => el.remove(), 4000);
+        function startSurprise() {
+            timerScreen.style.opacity = '0';
+            setTimeout(() => {
+                timerScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                initGarden();
+            }, 1000);
         }
 
-        // Crear elementos constantemente
-        setInterval(createVortex, 250);
+        function initGarden() {
+            // Iniciar Frases
+            const phraseBox = document.getElementById('phrase-box');
+            let current = 0;
+            
+            function showNext() {
+                phraseBox.innerHTML = `<div class="phrase" style="display:block">${phrasesArr[current]}</div>`;
+                current = (current + 1) % phrasesArr.length;
+                setTimeout(showNext, 4000);
+            }
+            showNext();
+
+            // Iniciar Girasoles
+            setInterval(() => {
+                const f = document.createElement('div');
+                f.className = 'flower-3d';
+                f.innerHTML = '🌻';
+                f.style.setProperty('--x', (Math.random() * 2000 - 1000) + 'px');
+                f.style.setProperty('--x2', (Math.random() * 4000 - 2000) + 'px');
+                f.style.setProperty('--t', (Math.random() * 2 + 3) + 's');
+                f.style.left = '50%';
+                document.getElementById('garden-box').appendChild(f);
+                setTimeout(() => f.remove(), 5000);
+            }, 300);
+
+            // Iniciar Polvo de Oro
+            setInterval(() => {
+                const d = document.createElement('div');
+                d.className = 'dust';
+                d.style.width = d.style.height = Math.random() * 3 + 'px';
+                d.style.left = Math.random() * 100 + 'vw';
+                d.style.setProperty('--t', (Math.random() * 4 + 4) + 's');
+                document.body.appendChild(d);
+                setTimeout(() => d.remove(), 8000);
+            }, 100);
+        }
     </script>
 </body>
 </html>
